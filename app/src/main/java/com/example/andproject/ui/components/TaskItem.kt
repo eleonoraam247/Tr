@@ -1,7 +1,6 @@
-package com.example.andproject.ui.components  // Исправьте пакет на ваш
+package com.example.andproject.ui.components
 
-import androidx.compose.animation.animateColorAsState  // ← ДОБАВЬТЕ ЭТОТ ИМПОРТ
-import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -26,32 +25,32 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.andproject.domain.model.Task
 import com.example.andproject.ui.theme.*
 
 enum class Priority(val label: String, val xp: Int, val color: Color) {
     HIGH("High priority", 50, RedAccent),
     NORMAL("Normal", 30, PurpleAccent),
-    LOW("Low priority", 20, BlueAccent)
-}
+    LOW("Low priority", 20, BlueAccent);
 
-data class Task(
-    val id: Int,
-    val name: String,
-    val dueLabel: String,
-    val priority: Priority,
-    val isCompleted: Boolean = false
-)
+    companion object {
+        fun fromString(value: String): Priority {
+            return entries.find { it.name == value } ?: NORMAL
+        }
+    }
+}
 
 @Composable
 fun TaskItem(
     task: Task,
-    onToggleComplete: (Task) -> Unit,
+    onToggleComplete: (Boolean) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val priorityColor = task.priority.color
+    val priority = Priority.fromString(task.priority)
+    val priorityColor = priority.color
     val checkBg by animateColorAsState(
         targetValue = if (task.isCompleted) GreenAccent else Color.Transparent,
-        animationSpec = tween(durationMillis = 300),  // Добавьте animationSpec
+        animationSpec = tween(durationMillis = 300),
         label = "checkBg"
     )
 
@@ -82,7 +81,7 @@ fun TaskItem(
                     color = if (task.isCompleted) GreenAccent else Gold.copy(0.5f),
                     shape = CircleShape
                 )
-                .clickable { onToggleComplete(task) },
+                .clickable { onToggleComplete(!task.isCompleted) },
             contentAlignment = Alignment.Center
         ) {
             if (task.isCompleted) {
@@ -98,7 +97,7 @@ fun TaskItem(
         // Task info
         Column(modifier = Modifier.weight(1f)) {
             Text(
-                text = task.name,
+                text = task.title,
                 fontFamily = Nunito,
                 fontWeight = FontWeight.SemiBold,
                 fontSize = 13.sp,
@@ -108,7 +107,7 @@ fun TaskItem(
                 overflow = TextOverflow.Ellipsis
             )
             Text(
-                text = "${task.dueLabel} · ${task.priority.label}",
+                text = "${task.description} · ${priority.label}",
                 fontFamily = Nunito,
                 fontWeight = FontWeight.Bold,
                 fontSize = 10.sp,
@@ -118,7 +117,7 @@ fun TaskItem(
 
         // XP reward
         Text(
-            text = "+${task.priority.xp} XP",
+            text = "+${task.xpValue} XP",
             fontFamily = Cinzel,
             fontWeight = FontWeight.Bold,
             fontSize = 11.sp,

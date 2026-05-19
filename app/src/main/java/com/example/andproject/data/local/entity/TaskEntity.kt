@@ -12,9 +12,10 @@ data class TaskEntity(
     val description: String,
     val xpValue: Int,
     val isCompleted: Boolean,
-    val dueDate: Long?
+    val dueDate: Long?,
+    val priority: String
 ) {
-    fun toTask(): Task = Task(id, title, description, xpValue, isCompleted, dueDate)
+    fun toTask(): Task = Task(id, title, description, xpValue, isCompleted, dueDate, priority)
     
     companion object {
         fun fromTask(task: Task): TaskEntity = TaskEntity(
@@ -23,7 +24,8 @@ data class TaskEntity(
             description = task.description,
             xpValue = task.xpValue,
             isCompleted = task.isCompleted,
-            dueDate = task.dueDate
+            dueDate = task.dueDate,
+            priority = task.priority
         )
     }
 }

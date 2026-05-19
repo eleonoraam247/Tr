@@ -14,7 +14,9 @@ import com.example.andproject.navigation.NavGraph
 import com.example.andproject.navigation.Screen
 import com.example.andproject.ui.components.BottomNavigationBar
 import com.example.andproject.ui.theme.LevelUpTheme
+import dagger.hilt.android.AndroidEntryPoint
 
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

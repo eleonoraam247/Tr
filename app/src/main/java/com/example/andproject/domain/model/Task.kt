@@ -6,5 +6,6 @@ data class Task(
     val description: String,
     val xpValue: Int,
     val isCompleted: Boolean = false,
-    val dueDate: Long? = null
+    val dueDate: Long? = null,
+    val priority: String = "NORMAL"
 )

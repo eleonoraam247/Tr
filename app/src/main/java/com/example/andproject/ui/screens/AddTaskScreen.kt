@@ -6,10 +6,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -17,208 +16,308 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
+import com.example.andproject.domain.model.Task
+import com.example.andproject.ui.components.Priority
 import com.example.andproject.ui.theme.*
-import kotlinx.coroutines.launch
+import com.example.andproject.ui.viewmodel.TasksViewModel
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddTaskScreen(
     navController: NavController,
-    onTaskAdded: (name: String, priority: String, dueDate: String, reminder: Boolean) -> Unit
+    viewModel: TasksViewModel = hiltViewModel()
 ) {
-    var taskName by remember { mutableStateOf("") }
-    var priority by remember { mutableStateOf("normal") } // normal, high, low
-    var dueOption by remember { mutableStateOf("today") } // today, tomorrow, custom
-    var customDate by remember { mutableStateOf("") }
-    var reminderEnabled by remember { mutableStateOf(true) }
-    val scope = rememberCoroutineScope()
-
-    val xpMap = mapOf("high" to 50, "normal" to 30, "low" to 20)
-    val currentXp = xpMap[priority] ?: 30
+    var title by remember { mutableStateOf("") }
+    var selectedPriority by remember { mutableStateOf(Priority.NORMAL) }
+    var isReminderEnabled by remember { mutableStateOf(true) }
+    var selectedDate by remember { mutableStateOf("Today") }
 
     Scaffold(
         containerColor = BgDark,
         topBar = {
-            TopAppBar(
-                title = { Text("New Quest", fontFamily = Cinzel, color = GoldLight) },
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = TextMuted)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .background(BgCard)
+                    .padding(horizontal = 16.dp, vertical = 20.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        IconButton(
+                            onClick = { navController.popBackStack() },
+                            modifier = Modifier.size(24.dp)
+                        ) {
+                            Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Gold, modifier = Modifier.size(20.dp))
+                        }
+                        Spacer(Modifier.width(12.dp))
+                        Text(
+                            text = "NEW QUEST",
+                            fontFamily = Cinzel,
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 18.sp,
+                            color = GoldLight
+                        )
                     }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(containerColor = BgCard),
-                actions = {
-                    Text("+$currentXp XP", fontFamily = Cinzel, color = Gold, fontSize = 12.sp, modifier = Modifier.padding(end = 16.dp))
+                    Text(
+                        text = "+${selectedPriority.xp} XP",
+                        fontFamily = Cinzel,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 14.sp,
+                        color = Gold
+                    )
                 }
-            )
+            }
         }
     ) { padding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .background(BgDark)
                 .padding(padding)
+                .background(BgDark)
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(18.dp)
+            verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
-            // Поле ввода названия
+            // QUEST NAME
+            SectionHeader(title = "QUEST NAME")
             OutlinedTextField(
-                value = taskName,
-                onValueChange = { taskName = it },
-                label = { Text("Quest name", color = TextMuted) },
-                placeholder = { Text("What must be done, adventurer?", color = TextMuted.copy(alpha = 0.5f)) },
-                textStyle = MaterialTheme.typography.bodyLarge.copy(fontFamily = Nunito, color = TextPrimary),
+                value = title,
+                onValueChange = { title = it },
+                placeholder = { Text("What must be done, adventurer?", color = TextMuted, fontSize = 14.sp) },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp)),
                 colors = OutlinedTextFieldDefaults.colors(
+                    focusedContainerColor = BgCard,
+                    unfocusedContainerColor = BgCard,
+                    focusedTextColor = TextPrimary,
+                    unfocusedTextColor = TextPrimary,
                     focusedBorderColor = Gold.copy(alpha = 0.5f),
-                    unfocusedBorderColor = Gold.copy(alpha = 0.2f),
-                    focusedLabelColor = Gold,
-                    unfocusedLabelColor = TextMuted
+                    unfocusedBorderColor = Color.Transparent,
+                    cursorColor = Gold
                 ),
-                modifier = Modifier.fillMaxWidth()
+                shape = RoundedCornerShape(12.dp)
             )
 
-            // Приоритет
-            Text("Priority", fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.1.sp, color = TextMuted)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                PriorityChip("high", "High", RedAccent, priority == "high") { priority = "high" }
-                PriorityChip("normal", "Normal", PurpleAccent, priority == "normal") { priority = "normal" }
-                PriorityChip("low", "Low", BlueAccent, priority == "low") { priority = "low" }
-            }
-
-            // Дедлайн
-            Text("Due date", fontSize = 10.sp, fontWeight = FontWeight.Bold, letterSpacing = 0.1.sp, color = TextMuted)
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                DueChip("today", "Today", dueOption == "today") { dueOption = "today" }
-                DueChip("tomorrow", "Tomorrow", dueOption == "tomorrow") { dueOption = "tomorrow" }
-            }
-            if (dueOption == "custom") {
-                OutlinedTextField(
-                    value = customDate,
-                    onValueChange = { customDate = it },
-                    label = { Text("Pick a date", color = TextMuted) },
-                    placeholder = { Text("YYYY-MM-DD", color = TextMuted.copy(alpha = 0.5f)) },
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedBorderColor = Gold.copy(alpha = 0.5f),
-                        unfocusedBorderColor = Gold.copy(alpha = 0.2f)
-                    ),
-                    modifier = Modifier.fillMaxWidth()
-                )
-            } else {
-                Button(
-                    onClick = { dueOption = "custom" },
-                    colors = ButtonDefaults.buttonColors(containerColor = BgCard),
-                    shape = RoundedCornerShape(10.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
-                        Icon(Icons.Default.CalendarMonth, contentDescription = null, tint = Gold, modifier = Modifier.size(18.dp))
-                        Spacer(Modifier.width(8.dp))
-                        Text("Pick a custom date", color = TextPrimary, fontSize = 11.sp)
-                    }
-                }
-            }
-
-            // Напоминание
+            // PRIORITY
+            SectionHeader(title = "PRIORITY")
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(BgCard)
-                    .padding(12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                Icon(Icons.Default.Notifications, contentDescription = null, tint = Gold, modifier = Modifier.size(22.dp))
-                Spacer(Modifier.width(12.dp))
-                Column(modifier = Modifier.weight(1f)) {
-                    Text("Notify me", fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary)
-                    Text("Get an alert before the deadline", fontSize = 10.sp, color = TextMuted)
+                Priority.entries.forEach { priority ->
+                    PriorityChipV2(
+                        priority = priority,
+                        isSelected = selectedPriority == priority,
+                        onClick = { selectedPriority = priority },
+                        modifier = Modifier.weight(1f)
+                    )
                 }
-                Switch(checked = reminderEnabled, onCheckedChange = { reminderEnabled = it }, colors = SwitchDefaults.colors(checkedThumbColor = Gold, checkedTrackColor = Gold.copy(alpha = 0.5f)))
             }
 
-            // Карточка XP
+            // DUE DATE
+            SectionHeader(title = "DUE DATE")
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                DateButton(
+                    title = "Today",
+                    subtitle = "Finish today",
+                    isSelected = selectedDate == "Today",
+                    onClick = { selectedDate = "Today" },
+                    modifier = Modifier.weight(1f)
+                )
+                DateButton(
+                    title = "Tomorrow",
+                    subtitle = "+1 day",
+                    isSelected = selectedDate == "Tomorrow",
+                    onClick = { selectedDate = "Tomorrow" },
+                    modifier = Modifier.weight(1f)
+                )
+            }
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(BgCard)
+                    .clickable { /* Date Picker */ }
+                    .padding(16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Text("Pick a date", color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    Text("Choose from calendar", color = TextMuted, fontSize = 11.sp)
+                }
+            }
+
+            // REMINDER
+            SectionHeader(title = "REMINDER")
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Gold.copy(alpha = 0.06f))
-                    .border(0.5.dp, Gold.copy(alpha = 0.25f), RoundedCornerShape(10.dp))
-                    .padding(12.dp),
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(BgCard)
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Text("XP reward for this quest", fontSize = 12.sp, color = TextMuted)
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(Icons.Default.Bolt, contentDescription = null, tint = GoldLight, modifier = Modifier.size(16.dp))
-                    Text("+$currentXp", fontFamily = Cinzel, fontSize = 18.sp, fontWeight = FontWeight.Bold, color = GoldLight)
+                Column {
+                    Text("Notify me", color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    Text("Get an alert before the deadline", color = TextMuted, fontSize = 11.sp)
+                }
+                Switch(
+                    checked = isReminderEnabled,
+                    onCheckedChange = { isReminderEnabled = it },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.White,
+                        checkedTrackColor = Gold,
+                        uncheckedThumbColor = TextMuted,
+                        uncheckedTrackColor = BgDark
+                    )
+                )
+            }
+
+            // XP REWARD BOX
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(BgCard)
+                    .border(0.5.dp, Gold.copy(alpha = 0.18f), RoundedCornerShape(12.dp))
+                    .padding(16.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("XP reward for this quest", color = TextMuted, fontSize = 14.sp)
+                    Text(
+                        text = selectedPriority.xp.toString(),
+                        fontFamily = Cinzel,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 24.sp,
+                        color = Gold
+                    )
                 }
             }
 
+            Spacer(Modifier.height(12.dp))
+
+            // ADD QUEST BUTTON
             Button(
                 onClick = {
-                    val dueLabel = when (dueOption) {
-                        "today" -> "today"
-                        "tomorrow" -> "tomorrow"
-                        else -> customDate.ifEmpty { "a custom date" }
+                    if (title.isNotBlank()) {
+                        viewModel.addTask(
+                            Task(
+                                title = title,
+                                description = "", // Image only shows title input
+                                xpValue = selectedPriority.xp,
+                                priority = selectedPriority.name
+                            )
+                        )
+                        navController.popBackStack()
                     }
-                    onTaskAdded(taskName, priority, dueLabel, reminderEnabled)
-                    navController.popBackStack()
                 },
-                enabled = taskName.isNotBlank(),
-                colors = ButtonDefaults.buttonColors(containerColor = Gold),
-                shape = RoundedCornerShape(10.dp),
-                modifier = Modifier.fillMaxWidth().height(52.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(54.dp),
+                colors = ButtonDefaults.buttonColors(containerColor = Gold.copy(alpha = 0.8f)),
+                shape = RoundedCornerShape(12.dp)
             ) {
-                Text("Add Quest — +$currentXp XP on complete", fontFamily = Cinzel, fontWeight = FontWeight.Bold, color = OnGold, fontSize = 13.sp)
+                Text(
+                    text = "ADD QUEST",
+                    fontFamily = Cinzel,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 16.sp,
+                    color = OnGold
+                )
             }
         }
     }
 }
 
 @Composable
-fun PriorityChip(label: String, display: String, color: Color, selected: Boolean, onClick: () -> Unit) {
-    Surface(
-        modifier = Modifier.clickable(onClick = onClick),
-        shape = RoundedCornerShape(10.dp),
-        color = if (selected) color.copy(alpha = 0.15f) else BgCard,
-        border = if (selected) androidx.compose.foundation.BorderStroke(1.dp, color) else androidx.compose.foundation.BorderStroke(0.5.dp, Gold.copy(alpha = 0.2f))
-    ) {
-        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(vertical = 8.dp, horizontal = 12.dp)) {
-            Icon(
-                imageVector = when (label) {
-                    "high" -> Icons.Default.Whatshot
-                    "normal" -> Icons.Default.Shield
-                    else -> Icons.Default.Air
-                },
-                contentDescription = null,
-                tint = color,
-                modifier = Modifier.size(20.dp)
+private fun SectionHeader(title: String) {
+    Text(
+        text = title,
+        fontFamily = Nunito,
+        fontWeight = FontWeight.Bold,
+        fontSize = 11.sp,
+        color = TextMuted,
+        letterSpacing = 0.1.sp
+    )
+}
+
+@Composable
+fun PriorityChipV2(
+    priority: Priority,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(if (isSelected) priority.color.copy(alpha = 0.08f) else BgCard)
+            .border(
+                width = if (isSelected) 1.5.dp else 0.dp,
+                color = if (isSelected) priority.color else Color.Transparent,
+                shape = RoundedCornerShape(12.dp)
             )
-            Text(display, fontSize = 10.sp, fontWeight = FontWeight.Bold, color = color)
-            Text("+${if(label=="high")50 else if(label=="normal")30 else 20} XP", fontSize = 9.sp, color = color)
+            .clickable { onClick() }
+            .padding(vertical = 12.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(
+                text = priority.name,
+                color = if (isSelected) priority.color else TextMuted,
+                fontWeight = FontWeight.Bold,
+                fontSize = 11.sp
+            )
+            Text(
+                text = "+${priority.xp} XP",
+                color = if (isSelected) priority.color.copy(alpha = 0.8f) else TextMuted.copy(alpha = 0.6f),
+                fontSize = 10.sp
+            )
         }
     }
 }
 
 @Composable
-fun DueChip(label: String, display: String, selected: Boolean, onClick: () -> Unit) {
-    Surface(
-        modifier = Modifier.clickable(onClick = onClick),
-        shape = RoundedCornerShape(10.dp),
-        color = if (selected) Gold.copy(alpha = 0.1f) else BgCard,
-        border = if (selected) androidx.compose.foundation.BorderStroke(1.dp, Gold) else androidx.compose.foundation.BorderStroke(0.5.dp, Gold.copy(alpha = 0.2f))
+fun DateButton(
+    title: String,
+    subtitle: String,
+    isSelected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(BgCard)
+            .border(
+                width = if (isSelected) 1.5.dp else 0.dp,
+                color = if (isSelected) Gold else Color.Transparent,
+                shape = RoundedCornerShape(12.dp)
+            )
+            .clickable { onClick() }
+            .padding(vertical = 12.dp, horizontal = 8.dp),
+        contentAlignment = Alignment.Center
     ) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 8.dp, horizontal = 12.dp)) {
-            Icon(Icons.Default.CalendarToday, contentDescription = null, tint = Gold, modifier = Modifier.size(16.dp))
-            Spacer(Modifier.width(6.dp))
-            Column {
-                Text(display, fontSize = 11.sp, fontWeight = FontWeight.Bold, color = if (selected) Gold else TextPrimary)
-                Text(if (label == "today") "Finish today" else if (label == "tomorrow") "+1 day" else "", fontSize = 9.sp, color = TextMuted)
-            }
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(title, color = if (isSelected) Gold else TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+            Text(subtitle, color = TextMuted, fontSize = 10.sp)
         }
     }
 }

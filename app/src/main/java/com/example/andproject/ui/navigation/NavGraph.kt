@@ -14,7 +14,9 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
         startDestination = Screen.Quests.route,
         modifier = modifier
     ) {
-        composable(Screen.Quests.route) { QuestsScreen(onAddTask = { navController.navigate(Screen.AddTask.route) }) }
+        composable(Screen.Quests.route) { 
+            QuestsScreen(onAddTask = { navController.navigate(Screen.AddTask.route) }) 
+        }
         composable(Screen.Stats.route) { StatsScreen() }
         composable(Screen.Settings.route) {
             SettingsScreen(
@@ -23,9 +25,28 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
                 onResetClick = { navController.navigate(Screen.ResetProgress.route) }
             )
         }
-        composable(Screen.AddTask.route) { AddTaskScreen(navController, onTaskAdded = { _, _, _, _ -> }) }
-        composable(Screen.UsernameChange.route) { UsernameChangeScreen(navController, currentUsername = "Arathorn", onUsernameChanged = {}) }
-        composable(Screen.ClassPicker.route) { ClassPickerScreen(navController, currentClassId = "wizard", onClassChanged = {}) }
-        composable(Screen.ResetProgress.route) { ResetProgressScreen(navController, onResetConfirmed = {}) }
+        composable(Screen.AddTask.route) { 
+            AddTaskScreen(navController = navController) 
+        }
+        composable(Screen.UsernameChange.route) {
+            UsernameChangeScreen(
+                navController = navController,
+                currentUsername = "Arathorn",
+                onUsernameChanged = { /* TODO: Implement update */ }
+            )
+        }
+        composable(Screen.ClassPicker.route) {
+            ClassPickerScreen(
+                navController = navController,
+                currentClassId = "wizard",
+                onClassChanged = { /* TODO: Implement update */ }
+            )
+        }
+        composable(Screen.ResetProgress.route) {
+            ResetProgressScreen(
+                navController = navController,
+                onResetConfirmed = { /* TODO: Implement reset */ }
+            )
+        }
     }
 }

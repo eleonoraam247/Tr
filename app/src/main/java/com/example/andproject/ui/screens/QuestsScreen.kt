@@ -20,31 +20,25 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.andproject.ui.components.*
 import com.example.andproject.ui.theme.*
+import com.example.andproject.ui.viewmodel.TasksViewModel
 
 @Composable
 fun QuestsScreen(
-    onAddTask: () -> Unit
+    onAddTask: () -> Unit,
+    viewModel: TasksViewModel = hiltViewModel()
 ) {
-    // Временные данные – заменить на ViewModel
-    var tasks by remember {
-        mutableStateOf(
-            listOf(
-                Task(1, "Finish project report", "Due today", Priority.HIGH),
-                Task(2, "Morning workout", "Due today", Priority.NORMAL),
-                Task(3, "Read 20 pages", "Due tomorrow", Priority.LOW),
-                Task(4, "Stand-up meeting", "Completed", Priority.NORMAL, isCompleted = true),
-                Task(5, "Plan weekly goals", "Completed", Priority.NORMAL, isCompleted = true)
-            )
-        )
-    }
+    val tasks by viewModel.tasks.collectAsState()
 
+    // TODO: Get these from a UserViewModel or DataStore later
     val xpCurrent = 620
     val xpMax = 1000
     val level = 12
     val xpToday = 180
     val streak = 5
+    val activeTasksCount = tasks.count { !it.isCompleted }
     val doneCount = tasks.count { it.isCompleted }
 
     Scaffold(
@@ -65,29 +59,23 @@ fun QuestsScreen(
             modifier = Modifier.fillMaxSize().padding(padding),
             contentPadding = PaddingValues(bottom = 80.dp)
         ) {
-            // Hero Header
             item {
                 HeroSection(level = level, currentXp = xpCurrent, maxXp = xpMax)
             }
-            // Статистика
             item {
                 StatsRow(xpToday = xpToday, doneCount = doneCount, streak = streak)
             }
-            // Заголовок списка
             item {
                 SectionHeader(
                     title = "Active Quests",
-                    subtitle = "${tasks.count { !it.isCompleted }} pending"
+                    subtitle = "$activeTasksCount pending"
                 )
             }
-            // Список задач
-            items(tasks, key = { it.id }) { task ->
+            items(tasks, key = { it.id ?: it.hashCode() }) { task ->
                 TaskItem(
                     task = task,
-                    onToggleComplete = { toggled ->
-                        tasks = tasks.map {
-                            if (it.id == toggled.id) it.copy(isCompleted = !it.isCompleted) else it
-                        }
+                    onToggleComplete = { isCompleted ->
+                        viewModel.onTaskCheckedChange(task, isCompleted)
                     },
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
                 )
@@ -144,7 +132,6 @@ private fun HeroSection(level: Int, currentXp: Int, maxXp: Int) {
                         )
                     }
                 }
-                // Avatar
                 Box(contentAlignment = Alignment.BottomEnd) {
                     Box(
                         modifier = Modifier
