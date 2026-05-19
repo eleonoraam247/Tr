@@ -34,12 +34,15 @@ fun AppNavigation() {
 
     Scaffold(
         bottomBar = {
-            if (currentRoute != null) {
+            if (currentRoute != null && currentRoute in listOf(Screen.Quests.route, Screen.Stats.route, Screen.Settings.route)) {
                 BottomNavigationBar(
                     items = listOf(Screen.Quests, Screen.Stats, Screen.Settings),
                     currentRoute = currentRoute,
                     onItemClick = { screen ->
-                        navController.navigate(screen.route) { launchSingleTop = true }
+                        navController.navigate(screen.route) {
+                            launchSingleTop = true
+                            popUpTo(Screen.Quests.route) { inclusive = false }
+                        }
                     }
                 )
             }

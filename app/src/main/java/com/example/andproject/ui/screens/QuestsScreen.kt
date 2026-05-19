@@ -24,7 +24,10 @@ import com.example.andproject.ui.components.*
 import com.example.andproject.ui.theme.*
 
 @Composable
-fun QuestsScreen(onAddTask: () -> Unit = {}) {
+fun QuestsScreen(
+    onAddTask: () -> Unit
+) {
+    // Временные данные – заменить на ViewModel
     var tasks by remember {
         mutableStateOf(
             listOf(
@@ -37,16 +40,24 @@ fun QuestsScreen(onAddTask: () -> Unit = {}) {
         )
     }
 
+    val xpCurrent = 620
+    val xpMax = 1000
+    val level = 12
+    val xpToday = 180
+    val streak = 5
+    val doneCount = tasks.count { it.isCompleted }
+
     Scaffold(
         containerColor = BgDark,
         floatingActionButton = {
             FloatingActionButton(
                 onClick = onAddTask,
                 containerColor = Gold,
+                contentColor = OnGold,
                 shape = CircleShape,
                 modifier = Modifier.size(52.dp)
             ) {
-                Icon(Icons.Default.Add, contentDescription = "Add")
+                Icon(Icons.Default.Add, contentDescription = "Add quest")
             }
         }
     ) { padding ->
@@ -54,14 +65,29 @@ fun QuestsScreen(onAddTask: () -> Unit = {}) {
             modifier = Modifier.fillMaxSize().padding(padding),
             contentPadding = PaddingValues(bottom = 80.dp)
         ) {
-            item { HeroSection(level = 12, currentXp = 620, maxXp = 1000) }
-            item { StatsRow(xpToday = 180, doneCount = tasks.count { it.isCompleted }, streak = 5) }
-            item { SectionHeader("Active Quests", "${tasks.count { !it.isCompleted }} pending") }
+            // Hero Header
+            item {
+                HeroSection(level = level, currentXp = xpCurrent, maxXp = xpMax)
+            }
+            // Статистика
+            item {
+                StatsRow(xpToday = xpToday, doneCount = doneCount, streak = streak)
+            }
+            // Заголовок списка
+            item {
+                SectionHeader(
+                    title = "Active Quests",
+                    subtitle = "${tasks.count { !it.isCompleted }} pending"
+                )
+            }
+            // Список задач
             items(tasks, key = { it.id }) { task ->
                 TaskItem(
                     task = task,
                     onToggleComplete = { toggled ->
-                        tasks = tasks.map { if (it.id == toggled.id) it.copy(isCompleted = !it.isCompleted) else it }
+                        tasks = tasks.map {
+                            if (it.id == toggled.id) it.copy(isCompleted = !it.isCompleted) else it
+                        }
                     },
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
                 )
@@ -77,25 +103,73 @@ private fun HeroSection(level: Int, currentXp: Int, maxXp: Int) {
             .fillMaxWidth()
             .background(BgCard)
             .border(0.5.dp, Gold.copy(alpha = 0.18f), RoundedCornerShape(bottomStart = 0.dp, bottomEnd = 0.dp))
-            .padding(16.dp)
+            .padding(start = 16.dp, end = 16.dp, top = 20.dp, bottom = 16.dp)
     ) {
         Column {
-            Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.Top
+            ) {
                 Column {
-                    Text("Adventurer", fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 11.sp, color = TextMuted)
-                    Text("Arathorn", fontFamily = Cinzel, fontWeight = FontWeight.Bold, fontSize = 20.sp, color = GoldLight)
+                    Text(
+                        text = "Adventurer",
+                        fontFamily = Nunito,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 11.sp,
+                        color = TextMuted,
+                        letterSpacing = 0.08.sp
+                    )
+                    Text(
+                        text = "Arathorn",
+                        fontFamily = Cinzel,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 20.sp,
+                        color = GoldLight
+                    )
                     Spacer(Modifier.height(6.dp))
-                    Box(Modifier.clip(RoundedCornerShape(6.dp)).background(PurpleAccent.copy(alpha = 0.15f))
-                        .border(0.5.dp, PurpleAccent.copy(0.3f), RoundedCornerShape(6.dp)).padding(horizontal = 8.dp, vertical = 3.dp)) {
-                        Text("🧙 Wizard of Focus", fontSize = 10.sp, fontFamily = Nunito, fontWeight = FontWeight.Bold, color = PurpleLight)
+                    Box(
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(PurpleAccent.copy(alpha = 0.15f))
+                            .border(0.5.dp, PurpleAccent.copy(0.3f), RoundedCornerShape(6.dp))
+                            .padding(horizontal = 8.dp, vertical = 3.dp)
+                    ) {
+                        Text(
+                            "🧙 Wizard of Focus",
+                            fontSize = 10.sp,
+                            fontFamily = Nunito,
+                            fontWeight = FontWeight.Bold,
+                            color = PurpleLight
+                        )
                     }
                 }
+                // Avatar
                 Box(contentAlignment = Alignment.BottomEnd) {
-                    Box(Modifier.size(58.dp).clip(CircleShape).background(BgCard2).border(2.dp, Gold, CircleShape), contentAlignment = Alignment.Center) {
+                    Box(
+                        modifier = Modifier
+                            .size(58.dp)
+                            .clip(CircleShape)
+                            .background(BgCard2)
+                            .border(2.dp, Gold, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
                         Text("⚔️", fontSize = 28.sp)
                     }
-                    Box(Modifier.offset(x = 4.dp, y = 4.dp).clip(RoundedCornerShape(8.dp)).background(Gold).padding(horizontal = 5.dp, vertical = 1.dp)) {
-                        Text("Lv $level", fontSize = 9.sp, fontFamily = Cinzel, fontWeight = FontWeight.Bold, color = OnGold)
+                    Box(
+                        modifier = Modifier
+                            .offset(x = 4.dp, y = 4.dp)
+                            .clip(RoundedCornerShape(8.dp))
+                            .background(Gold)
+                            .padding(horizontal = 5.dp, vertical = 1.dp)
+                    ) {
+                        Text(
+                            "Lv $level",
+                            fontSize = 9.sp,
+                            fontFamily = Cinzel,
+                            fontWeight = FontWeight.Bold,
+                            color = OnGold
+                        )
                     }
                 }
             }
@@ -107,17 +181,59 @@ private fun HeroSection(level: Int, currentXp: Int, maxXp: Int) {
 
 @Composable
 private fun StatsRow(xpToday: Int, doneCount: Int, streak: Int) {
-    Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        StatCard(Icons.Default.Star, Gold, "+$xpToday", "XP Today", Modifier.weight(1f))
-        StatCard(Icons.Default.CheckCircle, GreenAccent, "$doneCount", "Done", Modifier.weight(1f))
-        StatCard(Icons.Default.Whatshot, RedAccent, "$streak", "Streak", Modifier.weight(1f))
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 14.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
+    ) {
+        StatCard(
+            icon = Icons.Default.Star,
+            iconTint = Gold,
+            value = "+$xpToday",
+            label = "XP Today",
+            modifier = Modifier.weight(1f)
+        )
+        StatCard(
+            icon = Icons.Default.CheckCircle,
+            iconTint = GreenAccent,
+            value = "$doneCount",
+            label = "Done",
+            modifier = Modifier.weight(1f)
+        )
+        StatCard(
+            icon = Icons.Default.Whatshot,
+            iconTint = RedAccent,
+            value = "$streak",
+            label = "Streak",
+            modifier = Modifier.weight(1f)
+        )
     }
 }
 
 @Composable
 private fun SectionHeader(title: String, subtitle: String) {
-    Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp), horizontalArrangement = Arrangement.SpaceBetween) {
-        Text(title, fontFamily = Cinzel, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = TextMuted)
-        Text(subtitle, fontFamily = Nunito, fontWeight = FontWeight.Bold, fontSize = 11.sp, color = Gold)
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 4.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = title,
+            fontFamily = Cinzel,
+            fontWeight = FontWeight.Bold,
+            fontSize = 13.sp,
+            color = TextMuted,
+            letterSpacing = 0.10.sp
+        )
+        Text(
+            text = subtitle,
+            fontFamily = Nunito,
+            fontWeight = FontWeight.Bold,
+            fontSize = 11.sp,
+            color = Gold
+        )
     }
 }
