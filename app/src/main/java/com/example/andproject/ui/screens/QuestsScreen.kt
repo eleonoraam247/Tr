@@ -27,10 +27,14 @@ import com.example.andproject.ui.viewmodel.TasksViewModel
 
 @Composable
 fun QuestsScreen(
+    userName: String,
+    userClassId: String,
     onAddTask: () -> Unit,
     viewModel: TasksViewModel = hiltViewModel()
 ) {
     val tasks by viewModel.tasks.collectAsState()
+    
+    val selectedClass = allClasses.find { it.id == userClassId } ?: allClasses[0]
 
     // TODO: Get these from a UserViewModel or DataStore later
     val xpCurrent = 620
@@ -60,7 +64,13 @@ fun QuestsScreen(
             contentPadding = PaddingValues(bottom = 80.dp)
         ) {
             item {
-                HeroSection(level = level, currentXp = xpCurrent, maxXp = xpMax)
+                HeroSection(
+                    userName = userName,
+                    userClass = selectedClass,
+                    level = level, 
+                    currentXp = xpCurrent, 
+                    maxXp = xpMax
+                )
             }
             item {
                 StatsRow(xpToday = xpToday, doneCount = doneCount, streak = streak)
@@ -85,7 +95,7 @@ fun QuestsScreen(
 }
 
 @Composable
-private fun HeroSection(level: Int, currentXp: Int, maxXp: Int) {
+private fun HeroSection(userName: String, userClass: CharClass, level: Int, currentXp: Int, maxXp: Int) {
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -109,7 +119,7 @@ private fun HeroSection(level: Int, currentXp: Int, maxXp: Int) {
                         letterSpacing = 0.08.sp
                     )
                     Text(
-                        text = "Arathorn",
+                        text = userName,
                         fontFamily = Cinzel,
                         fontWeight = FontWeight.Bold,
                         fontSize = 20.sp,
@@ -119,16 +129,16 @@ private fun HeroSection(level: Int, currentXp: Int, maxXp: Int) {
                     Box(
                         modifier = Modifier
                             .clip(RoundedCornerShape(6.dp))
-                            .background(PurpleAccent.copy(alpha = 0.15f))
-                            .border(0.5.dp, PurpleAccent.copy(0.3f), RoundedCornerShape(6.dp))
+                            .background(userClass.accent.copy(alpha = 0.15f))
+                            .border(0.5.dp, userClass.accent.copy(0.3f), RoundedCornerShape(6.dp))
                             .padding(horizontal = 8.dp, vertical = 3.dp)
                     ) {
                         Text(
-                            "🧙 Wizard of Focus",
+                            "${userClass.emoji} ${userClass.name}",
                             fontSize = 10.sp,
                             fontFamily = Nunito,
                             fontWeight = FontWeight.Bold,
-                            color = PurpleLight
+                            color = userClass.accent
                         )
                     }
                 }

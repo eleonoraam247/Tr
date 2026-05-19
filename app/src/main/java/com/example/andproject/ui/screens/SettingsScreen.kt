@@ -24,10 +24,14 @@ import com.example.andproject.ui.theme.*
 
 @Composable
 fun SettingsScreen(
+    userName: String,
+    userClassId: String,
     onUsernameClick: () -> Unit,
     onClassClick: () -> Unit,
     onResetClick: () -> Unit
 ) {
+    val selectedClass = allClasses.find { it.id == userClassId } ?: allClasses[0]
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -55,20 +59,20 @@ fun SettingsScreen(
         SafeBanner()
 
         // Карточка профиля
-        ProfileCard()
+        ProfileCard(userName = userName, userClass = selectedClass)
 
         // Профиль
         SettingsSection(title = "Profile")
         SettingsItem(
             icon = Icons.Default.Person,
             title = "Username",
-            subtitle = "Arathorn",
+            subtitle = userName,
             onClick = onUsernameClick
         )
         SettingsItem(
             icon = Icons.Default.Person,
             title = "Class",
-            subtitle = "Wizard of Focus",
+            subtitle = selectedClass.name,
             onClick = onClassClick
         )
 
@@ -131,7 +135,7 @@ private fun SafeBanner() {
 }
 
 @Composable
-private fun ProfileCard() {
+private fun ProfileCard(userName: String, userClass: CharClass) {
     Row(
         modifier = Modifier
             .padding(horizontal = 16.dp, vertical = 0.dp)
@@ -151,7 +155,7 @@ private fun ProfileCard() {
                 .background(BgCard2),
             contentAlignment = Alignment.Center
         ) {
-            Text("⚔️", fontSize = 26.sp)
+            Text(userClass.emoji, fontSize = 26.sp)
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
@@ -164,8 +168,8 @@ private fun ProfileCard() {
             }
         }
         Column(modifier = Modifier.weight(1f)) {
-            Text("Arathorn", fontFamily = Cinzel, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = GoldLight)
-            Text("🧙 Wizard of Focus", fontSize = 11.sp, color = TextMuted)
+            Text(userName, fontFamily = Cinzel, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = GoldLight)
+            Text("${userClass.emoji} ${userClass.name}", fontSize = 11.sp, color = TextMuted)
             Spacer(Modifier.height(6.dp))
             Box(modifier = Modifier.fillMaxWidth().height(5.dp).clip(RoundedCornerShape(3.dp)).background(Color.White.copy(alpha = 0.06f))) {
                 Box(modifier = Modifier.fillMaxWidth(0.62f).fillMaxHeight().clip(RoundedCornerShape(3.dp)).background(Gold))

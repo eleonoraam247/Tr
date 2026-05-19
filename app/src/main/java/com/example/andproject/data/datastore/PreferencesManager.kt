@@ -19,11 +19,16 @@ class PreferencesManager @Inject constructor(
     @ApplicationContext private val context: Context
 ) {
     private val USER_NAME = stringPreferencesKey("user_name")
+    private val USER_CLASS = stringPreferencesKey("user_class")
     private val DARK_MODE = booleanPreferencesKey("dark_mode")
     private val TOTAL_XP = intPreferencesKey("total_xp")
 
     val userName: Flow<String> = context.dataStore.data.map { preferences ->
-        preferences[USER_NAME] ?: "Adventurer"
+        preferences[USER_NAME] ?: "Arathorn"
+    }
+
+    val userClass: Flow<String> = context.dataStore.data.map { preferences ->
+        preferences[USER_CLASS] ?: "wizard"
     }
 
     val totalXp: Flow<Int> = context.dataStore.data.map { preferences ->
@@ -33,6 +38,12 @@ class PreferencesManager @Inject constructor(
     suspend fun updateUserName(name: String) {
         context.dataStore.edit { preferences ->
             preferences[USER_NAME] = name
+        }
+    }
+
+    suspend fun updateUserClass(classId: String) {
+        context.dataStore.edit { preferences ->
+            preferences[USER_CLASS] = classId
         }
     }
 
@@ -46,6 +57,8 @@ class PreferencesManager @Inject constructor(
     suspend fun resetProgress() {
         context.dataStore.edit { preferences ->
             preferences[TOTAL_XP] = 0
+            preferences[USER_NAME] = "Arathorn"
+            preferences[USER_CLASS] = "wizard"
         }
     }
 }
