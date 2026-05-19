@@ -16,6 +16,7 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
     val userViewModel: UserViewModel = hiltViewModel()
     val userName by userViewModel.userName.collectAsState()
     val userClassId by userViewModel.userClass.collectAsState()
+    val userProgress by userViewModel.userProgress.collectAsState()
 
     NavHost(
         navController = navController,
@@ -26,6 +27,9 @@ fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
             QuestsScreen(
                 userName = userName,
                 userClassId = userClassId,
+                level = userProgress.level,
+                currentXp = userProgress.currentXpInLevel,
+                maxXp = userProgress.maxXpInLevel,
                 onAddTask = { navController.navigate(Screen.AddTask.route) }
             ) 
         }

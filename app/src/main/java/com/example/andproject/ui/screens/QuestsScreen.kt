@@ -29,6 +29,9 @@ import com.example.andproject.ui.viewmodel.TasksViewModel
 fun QuestsScreen(
     userName: String,
     userClassId: String,
+    level: Int,
+    currentXp: Int,
+    maxXp: Int,
     onAddTask: () -> Unit,
     viewModel: TasksViewModel = hiltViewModel()
 ) {
@@ -36,14 +39,13 @@ fun QuestsScreen(
     
     val selectedClass = allClasses.find { it.id == userClassId } ?: allClasses[0]
 
-    // TODO: Get these from a UserViewModel or DataStore later
-    val xpCurrent = 620
-    val xpMax = 1000
-    val level = 12
-    val xpToday = 180
-    val streak = 5
+    // Stats calculation
     val activeTasksCount = tasks.count { !it.isCompleted }
     val doneCount = tasks.count { it.isCompleted }
+    
+    // For now these can stay hardcoded or be moved to UserViewModel later
+    val xpToday = doneCount * 30 // Simplified logic
+    val streak = 5
 
     Scaffold(
         containerColor = BgDark,
@@ -68,8 +70,8 @@ fun QuestsScreen(
                     userName = userName,
                     userClass = selectedClass,
                     level = level, 
-                    currentXp = xpCurrent, 
-                    maxXp = xpMax
+                    currentXp = currentXp, 
+                    maxXp = maxXp
                 )
             }
             item {
@@ -215,8 +217,7 @@ private fun SectionHeader(title: String, subtitle: String) {
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 4.dp),
         horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
+        verticalAlignment = Alignment.CenterVertically) {
         Text(
             text = title,
             fontFamily = Cinzel,
