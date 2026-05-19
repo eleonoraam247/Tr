@@ -16,7 +16,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.andproject.ui.components.StatCard
@@ -25,57 +24,24 @@ import com.example.andproject.ui.theme.*
 @Composable
 fun StatsScreen() {
     Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(BgDark)
-            .verticalScroll(rememberScrollState())
-            .padding(bottom = 16.dp)
+        Modifier.fillMaxSize().background(BgDark).verticalScroll(rememberScrollState())
     ) {
-        // Header
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(BgCard)
-                .border(0.5.dp, Gold.copy(alpha = 0.18f), RoundedCornerShape(0.dp))
-                .padding(16.dp)
-        ) {
-            Text(
-                text = "⚡ Статистика",
-                fontFamily = Cinzel,
-                fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                color = GoldLight
-            )
+        // Заголовок
+        Box(Modifier.fillMaxWidth().background(BgCard).border(0.5.dp, Gold.copy(alpha = 0.18f), RoundedCornerShape(0.dp)).padding(16.dp)) {
+            Text("⚡ Chronicle", fontFamily = Cinzel, fontWeight = FontWeight.Bold, fontSize = 18.sp, color = GoldLight)
         }
-
-        // Summary cards
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            StatCard(
-                icon = Icons.Default.Star,
-                iconTint = Gold,
-                value = "1250",
-                label = "Всего XP",
-                modifier = Modifier.weight(1f)
-            )
-            StatCard(
-                icon = Icons.Default.CheckCircle,
-                iconTint = GreenAccent,
-                value = "42",
-                label = "Выполнено",
-                modifier = Modifier.weight(1f)
-            )
-            StatCard(
-                icon = Icons.Default.CalendarMonth,
-                iconTint = BlueAccent,
-                value = "18",
-                label = "Дней",
-                modifier = Modifier.weight(1f)
-            )
+        // График (упрощённо – можно позже доработать)
+        Box(Modifier.padding(16.dp).clip(RoundedCornerShape(12.dp)).background(BgCard).border(0.5.dp, Gold.copy(alpha = 0.18f), RoundedCornerShape(12.dp)).padding(14.dp)) {
+            Text("Weekly XP chart", fontSize = 10.sp, color = TextMuted)
         }
+        // Статистика
+        Row(Modifier.fillMaxWidth().padding(16.dp), horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+            StatCard(Icons.Default.Star, Gold, "620", "Total XP", Modifier.weight(1f))
+            StatCard(Icons.Default.CheckCircle, GreenAccent, "42", "Total Done", Modifier.weight(1f))
+            StatCard(Icons.Default.CalendarMonth, BlueAccent, "18d", "Active Days", Modifier.weight(1f))
+        }
+        // Достижения (список)
+        Text("Achievements", fontFamily = Cinzel, fontWeight = FontWeight.Bold, fontSize = 13.sp, color = TextMuted, modifier = Modifier.padding(16.dp))
+        // ... добавьте элементы достижений по аналогии с дизайном
     }
 }

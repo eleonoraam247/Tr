@@ -1,9 +1,7 @@
-package com.example.andproject.ui.navigation
+package com.example.andproject.navigation
 
-sealed class Screen(val route: String) {
-    object Home : Screen("home")
-    object Tasks : Screen("tasks")
-    object AddTask : Screen("add_task")
-    object Stats : Screen("stats")
-    object Profile : Screen("profile")
+sealed class Screen(val route: String, val title: String) {
+    object Quests : Screen("quests", "Quests")
+    object Stats : Screen("stats", "Chronicle")
+    object Settings : Screen("settings", "Settings")
 }

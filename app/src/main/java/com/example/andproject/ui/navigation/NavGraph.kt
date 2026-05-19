@@ -1,31 +1,29 @@
-package com.example.andproject.ui.navigation
+package com.example.andproject.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.andproject.ui.screens.*
+import com.example.andproject.ui.screens.QuestsScreen
+import com.example.andproject.ui.screens.StatsScreen
+import com.example.andproject.ui.screens.SettingsScreen
 
 @Composable
-fun NavGraph(navController: NavHostController) {
+fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
     NavHost(
         navController = navController,
-        startDestination = Screen.Home.route
+        startDestination = Screen.Quests.route,
+        modifier = modifier
     ) {
-        composable(route = Screen.Home.route) {
-            HomeScreen()
+        composable(Screen.Quests.route) {
+            QuestsScreen(onAddTask = { /* открыть AddTaskScreen */ })
         }
-        composable(route = Screen.Tasks.route) {
-            TasksScreen()
-        }
-        composable(route = Screen.AddTask.route) {
-            AddTaskScreen()
-        }
-        composable(route = Screen.Stats.route) {
+        composable(Screen.Stats.route) {
             StatsScreen()
         }
-        composable(route = Screen.Profile.route) {
-            ProfileScreen()
+        composable(Screen.Settings.route) {
+            SettingsScreen()
         }
     }
 }
