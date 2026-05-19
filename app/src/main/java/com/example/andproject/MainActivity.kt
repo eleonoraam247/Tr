@@ -1,32 +1,27 @@
-package com.example.andproject
+package com.example.andproject  // Убедитесь, что пакет правильный
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.padding
-import androidx.compose.material3.Scaffold
-import androidx.compose.runtime.Composable
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
-import androidx.navigation.compose.rememberNavController
-import com.example.andproject.ui.navigation.NavGraph
-import com.example.andproject.ui.theme.AndProjectTheme
-import dagger.hilt.android.AndroidEntryPoint
+import com.example.andproject.ui.screens.QuestsScreen  // Правильный импорт
+import com.example.andproject.ui.theme.LevelUpTheme
 
-@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
+
+        // Используем setContent для Compose, НЕ setContentView
         setContent {
-            AndProjectTheme {
-                val navController = rememberNavController()
-                Scaffold(
-                    modifier = Modifier.fillMaxSize()
-                ) { innerPadding ->
-                    // Root NavHost
-                    NavGraph(navController = navController)
+            LevelUpTheme {
+                Surface(
+                    modifier = Modifier.fillMaxSize(),
+                    color = MaterialTheme.colorScheme.background
+                ) {
+                    QuestsScreen()  // Ваш экран
                 }
             }
         }

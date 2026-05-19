@@ -17,41 +17,44 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.andproject.ui.theme.*
-// Не импортируйте конкретные цвета, если они уже есть в теме
 
 @Composable
-fun XpProgressBar(
-    currentXp: Int,
-    nextLevelXp: Int,
+fun XpBar(
     level: Int,
+    currentXp: Int,
+    maxXp: Int,
     modifier: Modifier = Modifier
 ) {
     val progress by animateFloatAsState(
-        targetValue   = currentXp.toFloat() / nextLevelXp.coerceAtLeast(1),
-        animationSpec = tween(600),
-        label         = "xpProgress"
+        targetValue = currentXp.toFloat() / maxXp.coerceAtLeast(1),
+        animationSpec = tween(durationMillis = 600),
+        label = "xpProgress"
     )
 
-    Column(modifier = modifier, verticalArrangement = Arrangement.spacedBy(6.dp)) {
+    Column(
+        modifier = modifier,
+        verticalArrangement = Arrangement.spacedBy(6.dp)
+    ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
             Text(
-                text       = "Level $level",
-                fontSize   = 11.sp,
+                text = "Level $level",
+                fontSize = 11.sp,
                 fontFamily = Nunito,
                 fontWeight = FontWeight.Bold,
-                color      = TextMuted  // Берется из theme
+                color = TextMuted
             )
             Text(
-                text       = "$currentXp / $nextLevelXp XP",
-                fontSize   = 11.sp,
+                text = "$currentXp / $maxXp XP",
+                fontSize = 11.sp,
                 fontFamily = Cinzel,
                 fontWeight = FontWeight.Bold,
-                color      = Gold  // Берется из theme
+                color = Gold
             )
         }
+
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -70,19 +73,3 @@ fun XpProgressBar(
         }
     }
 }
-// ❌ УДАЛИТЕ ЭТИ СТРОКИ (они вызывают ошибку):
-// fun Row(
-//     modifier: Modifier,
-//     horizontalArrangement: Arrangement.HorizontalOrVertical,
-//     content: () -> Unit
-// ) {
-// }
-//
-// fun Box(modifier: Modifier, content: () -> Unit) {}
-//
-// fun Column(
-//     modifier: Modifier,
-//     verticalArrangement: Arrangement.HorizontalOrVertical,
-//     content: () -> Unit
-// ) {
-// }
