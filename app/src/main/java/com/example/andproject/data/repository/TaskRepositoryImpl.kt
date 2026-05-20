@@ -12,21 +12,18 @@ class TaskRepositoryImpl @Inject constructor(
     private val dao: TaskDao
 ) : TaskRepository {
 
-    override fun getTasks(): Flow<List<Task>> {
-        return dao.getTasks().map { entities ->
-            entities.map { it.toTask() }
-        }
-    }
+    override fun getTasks(): Flow<List<Task>> =
+        dao.getTasks().map { it.map(TaskEntity::toTask) }
 
-    override suspend fun getTaskById(id: Int): Task? {  // Добавлен suspend
-        return dao.getTaskById(id)?.toTask()
-    }
+    override suspend fun getTaskById(id: Int): Task? =
+        dao.getTaskById(id)?.toTask()
 
-    override suspend fun insertTask(task: Task) {  // Добавлен suspend
+    override suspend fun insertTask(task: Task) =
         dao.insertTask(TaskEntity.fromTask(task))
-    }
 
-    override suspend fun deleteTask(task: Task) {  // Добавлен suspend
+    override suspend fun deleteTask(task: Task) =
         dao.deleteTask(TaskEntity.fromTask(task))
-    }
+
+    override suspend fun deleteAllTasks() =   // ← новый метод
+        dao.deleteAll()
 }

@@ -3,6 +3,7 @@ package com.example.andproject.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.andproject.data.datastore.PreferencesManager
+import com.example.andproject.domain.repository.TaskRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +21,8 @@ data class UserProgress(
 
 @HiltViewModel
 class UserViewModel @Inject constructor(
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
+    private val taskRepository: TaskRepository   // ← добавлен для удаления задач
 ) : ViewModel() {
 
     val userName = preferencesManager.userName.stateIn(
@@ -41,15 +43,14 @@ class UserViewModel @Inject constructor(
         initialValue = 0
     )
 
-    // Прогресс: допустим, каждый уровень — 1000 XP
     val userProgress: StateFlow<UserProgress> = preferencesManager.totalXp.map { total ->
         val level = (total / 1000) + 1
         val currentXpInLevel = total % 1000
         UserProgress(
-            level = level,
+            level            = level,
             currentXpInLevel = currentXpInLevel,
-            maxXpInLevel = 1000,
-            totalXp = total
+            maxXpInLevel     = 1000,
+            totalXp          = total
         )
     }.stateIn(
         scope = viewModelScope,
@@ -58,20 +59,19 @@ class UserViewModel @Inject constructor(
     )
 
     fun updateUserName(name: String) {
-        viewModelScope.launch {
-            preferencesManager.updateUserName(name)
-        }
+        viewModelScope.launch { preferencesManager.updateUserName(name) }
     }
 
     fun updateUserClass(classId: String) {
-        viewModelScope.launch {
-            preferencesManager.updateUserClass(classId)
-        }
+        viewModelScope.launch { preferencesManager.updateUserClass(classId) }
     }
 
     fun resetProgress() {
         viewModelScope.launch {
+            // 1. Сбрасываем XP, имя, класс в DataStore
             preferencesManager.resetProgress()
+            // 2. Удаляем ВСЕ задачи из Room — раньше этого не было!
+            taskRepository.deleteAllTasks()
         }
     }
 }

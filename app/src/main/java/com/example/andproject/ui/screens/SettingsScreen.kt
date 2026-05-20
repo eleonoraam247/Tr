@@ -22,6 +22,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.andproject.ui.theme.*
 
+// CharClass и allClasses объявлены в ClassPickerScreen.kt —
+// они в том же пакете (ui.screens), поэтому импорт не нужен.
+
 @Composable
 fun SettingsScreen(
     userName: String,
@@ -47,147 +50,153 @@ fun SettingsScreen(
                 .padding(16.dp)
         ) {
             Text(
-                text = "⚙️ Guild Settings",
+                "⚙️ Guild Settings",
                 fontFamily = Cinzel,
                 fontWeight = FontWeight.Bold,
-                fontSize = 18.sp,
-                color = GoldLight
+                fontSize   = 18.sp,
+                color      = GoldLight
             )
         }
 
-        // Безопасный баннер (необязательно, просто для демонстрации)
-        SafeBanner()
-
         // Карточка профиля
+        Spacer(Modifier.height(16.dp))
         ProfileCard(userName = userName, userClass = selectedClass)
 
         // Профиль
-        SettingsSection(title = "Profile")
-        SettingsItem(
-            icon = Icons.Default.Person,
-            title = "Username",
-            subtitle = userName,
-            onClick = onUsernameClick
-        )
-        SettingsItem(
-            icon = Icons.Default.Person,
-            title = "Class",
-            subtitle = selectedClass.name,
-            onClick = onClassClick
-        )
+        SettingsSection("Profile")
+        SettingsGroup {
+            SettingsItem(Icons.Default.Person,      "Username", userName,           onClick = onUsernameClick)
+            SettingsDivider()
+            SettingsItem(Icons.Default.AutoAwesome, "Class",    selectedClass.name, onClick = onClassClick)
+        }
 
         // Уведомления
-        SettingsSection(title = "Notifications")
-        SwitchItem(
-            icon = Icons.Default.Notifications,
-            title = "Daily reminders",
-            subtitle = "9:00 AM every day",
-            defaultChecked = true
-        )
-        SwitchItem(
-            icon = Icons.Default.Alarm,
-            title = "Unfinished quest alerts",
-            subtitle = "1 hour before midnight",
-            defaultChecked = true
-        )
+        SettingsSection("Notifications")
+        SettingsGroup {
+            SwitchItem(Icons.Default.Notifications, "Daily reminders",        "9:00 AM every day",      true)
+            SettingsDivider()
+            SwitchItem(Icons.Default.Alarm,         "Unfinished quest alerts", "1 hour before midnight", true)
+        }
 
         // Внешний вид
-        SettingsSection(title = "Appearance")
-        SwitchItem(
-            icon = Icons.Default.BrightnessLow,
-            title = "Dark mode",
-            subtitle = "Always on",
-            defaultChecked = true,
-            enabled = false
-        )
+        SettingsSection("Appearance")
+        SettingsGroup {
+            SwitchItem(Icons.Default.DarkMode, "Dark mode", "Always on", true, enabled = false)
+        }
 
         // Данные
-        SettingsSection(title = "Data")
-        SettingsItem(
-            icon = Icons.Default.Delete,
-            title = "Reset progress",
-            subtitle = "This cannot be undone",
-            iconTint = RedAccent,
-            textColor = RedAccent,
-            onClick = onResetClick
+        SettingsSection("Data")
+        SettingsGroup {
+            SettingsItem(
+                icon      = Icons.Default.DeleteForever,
+                title     = "Reset progress",
+                subtitle  = "This cannot be undone",
+                iconTint  = RedAccent,
+                textColor = RedAccent,
+                onClick   = onResetClick
+            )
+        }
+
+        Spacer(Modifier.height(24.dp))
+        Text(
+            "LevelUp v1.0.0",
+            fontFamily = Nunito,
+            fontWeight = FontWeight.Bold,
+            fontSize   = 11.sp,
+            color      = TextMuted.copy(alpha = 0.5f),
+            modifier   = Modifier.fillMaxWidth().wrapContentWidth()
         )
+        Spacer(Modifier.height(16.dp))
     }
 }
 
-@Composable
-private fun SafeBanner() {
-    Box(
-        modifier = Modifier
-            .padding(16.dp)
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .background(GreenAccent.copy(alpha = 0.08f))
-            .border(0.5.dp, GreenAccent.copy(alpha = 0.25f), RoundedCornerShape(10.dp))
-            .padding(10.dp),
-        contentAlignment = Alignment.CenterStart
-    ) {
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(Icons.Default.Shield, contentDescription = null, tint = GreenAccent, modifier = Modifier.size(18.dp))
-            Spacer(Modifier.width(8.dp))
-            Text("Progress safe — reset cancelled", fontSize = 12.sp, fontWeight = FontWeight.Bold, color = GreenAccent)
-        }
-    }
-}
+// ── ProfileCard ───────────────────────────────────────────
+// Использует поля CharClass из ClassPickerScreen: .emoji, .name, .accent
 
 @Composable
 private fun ProfileCard(userName: String, userClass: CharClass) {
     Row(
         modifier = Modifier
-            .padding(horizontal = 16.dp, vertical = 0.dp)
+            .padding(horizontal = 16.dp)
             .fillMaxWidth()
             .clip(RoundedCornerShape(14.dp))
             .background(BgCard)
-            .border(0.5.dp, Gold.copy(alpha = 0.18f), RoundedCornerShape(14.dp))
+            .border(0.5.dp, Gold.copy(0.18f), RoundedCornerShape(14.dp))
             .padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically,
+        verticalAlignment     = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(14.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .size(54.dp)
-                .clip(CircleShape)
-                .border(2.dp, Gold, CircleShape)
-                .background(BgCard2),
-            contentAlignment = Alignment.Center
-        ) {
-            Text(userClass.emoji, fontSize = 26.sp)
+        Box(contentAlignment = Alignment.BottomEnd) {
             Box(
                 modifier = Modifier
-                    .align(Alignment.BottomEnd)
+                    .size(54.dp)
+                    .clip(CircleShape)
+                    .background(BgCard2)
+                    .border(2.dp, Gold, CircleShape),
+                contentAlignment = Alignment.Center
+            ) { Text(userClass.emoji, fontSize = 26.sp) }
+            Box(
+                modifier = Modifier
                     .offset(x = 4.dp, y = 4.dp)
                     .clip(RoundedCornerShape(8.dp))
                     .background(Gold)
                     .padding(horizontal = 4.dp, vertical = 1.dp)
-            ) {
-                Text("12", fontSize = 9.sp, fontFamily = Cinzel, color = OnGold)
-            }
+            ) { Text("12", fontSize = 9.sp, fontFamily = Cinzel, color = OnGold) }
         }
         Column(modifier = Modifier.weight(1f)) {
-            Text(userName, fontFamily = Cinzel, fontSize = 15.sp, fontWeight = FontWeight.Bold, color = GoldLight)
+            Text(userName, fontFamily = Cinzel, fontSize = 15.sp,
+                fontWeight = FontWeight.Bold, color = GoldLight)
             Text("${userClass.emoji} ${userClass.name}", fontSize = 11.sp, color = TextMuted)
             Spacer(Modifier.height(6.dp))
-            Box(modifier = Modifier.fillMaxWidth().height(5.dp).clip(RoundedCornerShape(3.dp)).background(Color.White.copy(alpha = 0.06f))) {
-                Box(modifier = Modifier.fillMaxWidth(0.62f).fillMaxHeight().clip(RoundedCornerShape(3.dp)).background(Gold))
+            Box(
+                modifier = Modifier.fillMaxWidth().height(5.dp)
+                    .clip(RoundedCornerShape(3.dp))
+                    .background(Color.White.copy(alpha = 0.06f))
+            ) {
+                Box(
+                    modifier = Modifier.fillMaxWidth(0.62f).fillMaxHeight()
+                        .clip(RoundedCornerShape(3.dp)).background(Gold)
+                )
             }
-            Text("620 / 1000 XP · Level 12", fontSize = 10.sp, color = TextMuted, modifier = Modifier.padding(top = 4.dp))
+            Text("620 / 1000 XP · Level 12", fontSize = 10.sp, color = TextMuted,
+                modifier = Modifier.padding(top = 4.dp))
         }
     }
 }
 
+// ── Helpers ───────────────────────────────────────────────
+
 @Composable
 private fun SettingsSection(title: String) {
     Text(
-        text = title.uppercase(),
-        fontSize = 10.sp,
-        fontWeight = FontWeight.Bold,
-        letterSpacing = 0.1.sp,
-        color = TextMuted,
-        modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 6.dp)
+        text          = title.uppercase(),
+        fontSize      = 10.sp,
+        fontWeight    = FontWeight.Bold,
+        letterSpacing = 0.10.sp,
+        color         = TextMuted,
+        modifier      = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 6.dp)
+    )
+}
+
+@Composable
+private fun SettingsGroup(content: @Composable ColumnScope.() -> Unit) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+            .clip(RoundedCornerShape(12.dp))
+            .background(BgCard)
+            .border(0.5.dp, Gold.copy(0.18f), RoundedCornerShape(12.dp)),
+        content = content
+    )
+}
+
+@Composable
+private fun SettingsDivider() {
+    HorizontalDivider(
+        color     = Gold.copy(alpha = 0.10f),
+        thickness = 0.5.dp,
+        modifier  = Modifier.padding(start = 46.dp)
     )
 }
 
@@ -196,7 +205,7 @@ private fun SettingsItem(
     icon: ImageVector,
     title: String,
     subtitle: String,
-    iconTint: Color = Gold,
+    iconTint: Color  = Gold,
     textColor: Color = TextPrimary,
     onClick: () -> Unit
 ) {
@@ -204,16 +213,16 @@ private fun SettingsItem(
         modifier = Modifier
             .fillMaxWidth()
             .clickable(onClick = onClick)
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalAlignment     = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(22.dp))
-        Spacer(Modifier.width(12.dp))
+        Icon(icon, null, tint = iconTint, modifier = Modifier.size(20.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(title, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = textColor)
+            Text(title,    fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = textColor)
             Text(subtitle, fontSize = 11.sp, color = TextMuted)
         }
-        Icon(Icons.Default.KeyboardArrowRight, contentDescription = null, tint = TextMuted, modifier = Modifier.size(20.dp))
+        Icon(Icons.Default.ChevronRight, null, tint = TextMuted, modifier = Modifier.size(16.dp))
     }
 }
 
@@ -229,22 +238,25 @@ private fun SwitchItem(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(horizontal = 14.dp, vertical = 12.dp),
+        verticalAlignment     = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Icon(icon, contentDescription = null, tint = Gold, modifier = Modifier.size(22.dp))
-        Spacer(Modifier.width(12.dp))
+        Icon(icon, null, tint = Gold, modifier = Modifier.size(20.dp))
         Column(modifier = Modifier.weight(1f)) {
-            Text(title, fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary)
+            Text(title,    fontSize = 13.sp, fontWeight = FontWeight.SemiBold, color = TextPrimary)
             Text(subtitle, fontSize = 11.sp, color = TextMuted)
         }
         Switch(
-            checked = checked,
+            checked         = checked,
             onCheckedChange = { if (enabled) checked = it },
-            enabled = enabled,
-            colors = SwitchDefaults.colors(
-                checkedThumbColor = Gold,
-                checkedTrackColor = Gold.copy(alpha = 0.5f)
+            enabled         = enabled,
+            colors          = SwitchDefaults.colors(
+                checkedThumbColor    = Color.White,
+                checkedTrackColor    = Gold,
+                uncheckedTrackColor  = Color.White.copy(0.10f),
+                checkedBorderColor   = Color.Transparent,
+                uncheckedBorderColor = Color.Transparent
             )
         )
     }

@@ -4,21 +4,29 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.runtime.Composable
 
-private val DarkColorScheme = darkColorScheme(
-    primary = Gold,
-    onPrimary = OnGold,
-    secondary = PurpleAccent,
-    background = BgDark,
-    surface = BgCard,
-    onSurface = TextPrimary,
-    error = RedAccent
+private val LevelUpColorScheme = darkColorScheme(
+    primary          = Gold,
+    onPrimary        = OnGold,
+    secondary        = PurpleAccent,
+    onSecondary      = TextPrimary,
+    background       = BgDark,
+    onBackground     = TextPrimary,
+    surface          = BgCard,
+    onSurface        = TextPrimary,
+    surfaceVariant   = BgCard2,
+    onSurfaceVariant = TextMuted,
+    error            = RedAccent,
+    onError          = TextPrimary,
 )
 
 @Composable
 fun LevelUpTheme(content: @Composable () -> Unit) {
     MaterialTheme(
-        colorScheme = DarkColorScheme,
-        typography = AppTypography,
-        content = content
+        colorScheme = LevelUpColorScheme,
+        typography  = LevelUpTypography,  // ← теперь указывает на нашу переменную
+        content     = content
     )
 }
+
+@Composable
+fun AndProjectTheme(content: @Composable () -> Unit) = LevelUpTheme(content)

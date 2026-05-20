@@ -17,4 +17,7 @@ interface TaskDao {
 
     @Delete
     suspend fun deleteTask(task: TaskEntity)
+
+    @Query("DELETE FROM tasks")   // ← добавлено для сброса прогресса
+    suspend fun deleteAll()
 }
