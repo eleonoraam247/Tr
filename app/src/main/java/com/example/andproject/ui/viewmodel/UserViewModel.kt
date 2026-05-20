@@ -3,6 +3,7 @@ package com.example.andproject.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.andproject.data.datastore.PreferencesManager
+import com.example.andproject.domain.repository.TaskRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +21,8 @@ data class UserProgress(
 
 @HiltViewModel
 class UserViewModel @Inject constructor(
-    private val preferencesManager: PreferencesManager
+    private val preferencesManager: PreferencesManager,
+    private val taskRepository: TaskRepository
 ) : ViewModel() {
 
     val userName = preferencesManager.userName.stateIn(
@@ -72,6 +74,7 @@ class UserViewModel @Inject constructor(
     fun resetProgress() {
         viewModelScope.launch {
             preferencesManager.resetProgress()
+            taskRepository.clearAllTasks()
         }
     }
 }

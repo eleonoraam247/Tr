@@ -24,6 +24,8 @@ import com.example.andproject.domain.model.Task
 import com.example.andproject.ui.components.Priority
 import com.example.andproject.ui.theme.*
 import com.example.andproject.ui.viewmodel.TasksViewModel
+import java.text.SimpleDateFormat
+import java.util.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -35,6 +37,47 @@ fun AddTaskScreen(
     var selectedPriority by remember { mutableStateOf(Priority.NORMAL) }
     var isReminderEnabled by remember { mutableStateOf(true) }
     var selectedDate by remember { mutableStateOf("Today") }
+    
+    // State for Date Picker
+    var showDatePicker by remember { mutableStateOf(false) }
+    val datePickerState = rememberDatePickerState()
+    val formatter = SimpleDateFormat("dd MMM yyyy", Locale.getDefault())
+
+    if (showDatePicker) {
+        DatePickerDialog(
+            onDismissRequest = { showDatePicker = false },
+            confirmButton = {
+                TextButton(onClick = {
+                    val selectedDateMillis = datePickerState.selectedDateMillis
+                    if (selectedDateMillis != null) {
+                        selectedDate = formatter.format(Date(selectedDateMillis))
+                    }
+                    showDatePicker = false
+                }) {
+                    Text("Confirm", color = Gold)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { showDatePicker = false }) {
+                    Text("Cancel", color = TextMuted)
+                }
+            },
+            colors = DatePickerDefaults.colors(
+                containerColor = BgCard
+            )
+        ) {
+            DatePicker(
+                state = datePickerState,
+                colors = DatePickerDefaults.colors(
+                    todayContentColor = Gold,
+                    selectedDayContainerColor = Gold,
+                    selectedDayContentColor = BgDark,
+                    titleContentColor = Gold,
+                    headlineContentColor = Gold
+                )
+            )
+        }
+    }
 
     Scaffold(
         containerColor = BgDark,
@@ -149,12 +192,22 @@ fun AddTaskScreen(
                     .fillMaxWidth()
                     .clip(RoundedCornerShape(12.dp))
                     .background(BgCard)
-                    .clickable { /* Date Picker */ }
+                    .border(
+                        width = if (selectedDate != "Today" && selectedDate != "Tomorrow") 1.5.dp else 0.dp,
+                        color = Gold,
+                        shape = RoundedCornerShape(12.dp)
+                    )
+                    .clickable { showDatePicker = true }
                     .padding(16.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text("Pick a date", color = TextPrimary, fontSize = 13.sp, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = if (selectedDate != "Today" && selectedDate != "Tomorrow") selectedDate else "Pick a date",
+                        color = if (selectedDate != "Today" && selectedDate != "Tomorrow") Gold else TextPrimary,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                     Text("Choose from calendar", color = TextMuted, fontSize = 11.sp)
                 }
             }
