@@ -51,7 +51,7 @@ dependencies {
     implementation(libs.androidx.compose.ui.tooling.preview)
     implementation(libs.androidx.compose.material3)
 
-    // ДОБАВЬТЕ ЭТУ СТРОКУ ДЛЯ ИКОНОК (Whatshot и др.)
+    // Иконки (Whatshot и др.)
     implementation("androidx.compose.material:material-icons-extended")
 
     // Hilt
@@ -71,9 +71,6 @@ dependencies {
 
     // Navigation
     implementation(libs.androidx.navigation.compose)
-
-    implementation("androidx.navigation:navigation-compose:2.7.7")
-
 
     // DataStore
     implementation(libs.androidx.datastore.preferences)

@@ -223,7 +223,8 @@ fun AddTaskScreen(
                                 description = "", // Image only shows title input
                                 xpValue = selectedPriority.xp,
                                 priority = selectedPriority.name
-                            )
+                            ),
+                            isReminderEnabled
                         )
                         navController.popBackStack()
                     }
