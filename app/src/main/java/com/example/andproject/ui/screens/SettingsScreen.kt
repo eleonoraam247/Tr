@@ -15,6 +15,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -22,13 +23,15 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.andproject.ui.theme.*
 
-// CharClass и allClasses объявлены в ClassPickerScreen.kt —
-// они в том же пакете (ui.screens), поэтому импорт не нужен.
+// CharClass и allClasses — из ClassPickerScreen.kt, тот же пакет, импорт не нужен
 
 @Composable
 fun SettingsScreen(
     userName: String,
     userClassId: String,
+    level: Int,           // ← реальный уровень
+    currentXp: Int,       // ← реальный XP
+    maxXp: Int,           // ← реальный макс XP
     onUsernameClick: () -> Unit,
     onClassClick: () -> Unit,
     onResetClick: () -> Unit
@@ -49,20 +52,20 @@ fun SettingsScreen(
                 .border(0.5.dp, Gold.copy(alpha = 0.18f), RoundedCornerShape(0.dp))
                 .padding(16.dp)
         ) {
-            Text(
-                "⚙️ Guild Settings",
-                fontFamily = Cinzel,
-                fontWeight = FontWeight.Bold,
-                fontSize   = 18.sp,
-                color      = GoldLight
-            )
+            Text("⚙️ Guild Settings", fontFamily = Cinzel, fontWeight = FontWeight.Bold,
+                fontSize = 18.sp, color = GoldLight)
         }
 
-        // Карточка профиля
+        // Карточка профиля — реальные данные
         Spacer(Modifier.height(16.dp))
-        ProfileCard(userName = userName, userClass = selectedClass)
+        ProfileCard(
+            userName  = userName,
+            userClass = selectedClass,
+            level     = level,
+            currentXp = currentXp,
+            maxXp     = maxXp
+        )
 
-        // Профиль
         SettingsSection("Profile")
         SettingsGroup {
             SettingsItem(Icons.Default.Person,      "Username", userName,           onClick = onUsernameClick)
@@ -70,21 +73,18 @@ fun SettingsScreen(
             SettingsItem(Icons.Default.AutoAwesome, "Class",    selectedClass.name, onClick = onClassClick)
         }
 
-        // Уведомления
         SettingsSection("Notifications")
         SettingsGroup {
-            SwitchItem(Icons.Default.Notifications, "Daily reminders",        "9:00 AM every day",      true)
+            SwitchItem(Icons.Default.Notifications, "Daily reminders",         "9:00 AM every day",      true)
             SettingsDivider()
-            SwitchItem(Icons.Default.Alarm,         "Unfinished quest alerts", "1 hour before midnight", true)
+            SwitchItem(Icons.Default.Alarm,         "Unfinished quest alerts",  "1 hour before midnight", true)
         }
 
-        // Внешний вид
         SettingsSection("Appearance")
         SettingsGroup {
             SwitchItem(Icons.Default.DarkMode, "Dark mode", "Always on", true, enabled = false)
         }
 
-        // Данные
         SettingsSection("Data")
         SettingsGroup {
             SettingsItem(
@@ -98,23 +98,23 @@ fun SettingsScreen(
         }
 
         Spacer(Modifier.height(24.dp))
-        Text(
-            "LevelUp v1.0.0",
-            fontFamily = Nunito,
-            fontWeight = FontWeight.Bold,
-            fontSize   = 11.sp,
-            color      = TextMuted.copy(alpha = 0.5f),
-            modifier   = Modifier.fillMaxWidth().wrapContentWidth()
-        )
+        Text("LevelUp v1.0.0", fontFamily = Nunito, fontWeight = FontWeight.Bold,
+            fontSize = 11.sp, color = TextMuted.copy(alpha = 0.5f),
+            modifier = Modifier.fillMaxWidth().wrapContentWidth())
         Spacer(Modifier.height(16.dp))
     }
 }
 
-// ── ProfileCard ───────────────────────────────────────────
-// Использует поля CharClass из ClassPickerScreen: .emoji, .name, .accent
-
 @Composable
-private fun ProfileCard(userName: String, userClass: CharClass) {
+private fun ProfileCard(
+    userName: String,
+    userClass: CharClass,
+    level: Int,
+    currentXp: Int,
+    maxXp: Int
+) {
+    val xpFraction = (currentXp.toFloat() / maxXp.coerceAtLeast(1)).coerceIn(0f, 1f)
+
     Row(
         modifier = Modifier
             .padding(horizontal = 16.dp)
@@ -129,10 +129,8 @@ private fun ProfileCard(userName: String, userClass: CharClass) {
         Box(contentAlignment = Alignment.BottomEnd) {
             Box(
                 modifier = Modifier
-                    .size(54.dp)
-                    .clip(CircleShape)
-                    .background(BgCard2)
-                    .border(2.dp, Gold, CircleShape),
+                    .size(54.dp).clip(CircleShape)
+                    .background(BgCard2).border(2.dp, Gold, CircleShape),
                 contentAlignment = Alignment.Center
             ) { Text(userClass.emoji, fontSize = 26.sp) }
             Box(
@@ -141,49 +139,46 @@ private fun ProfileCard(userName: String, userClass: CharClass) {
                     .clip(RoundedCornerShape(8.dp))
                     .background(Gold)
                     .padding(horizontal = 4.dp, vertical = 1.dp)
-            ) { Text("12", fontSize = 9.sp, fontFamily = Cinzel, color = OnGold) }
+            ) {
+                Text("$level", fontSize = 9.sp, fontFamily = Cinzel, color = OnGold)
+            }
         }
         Column(modifier = Modifier.weight(1f)) {
             Text(userName, fontFamily = Cinzel, fontSize = 15.sp,
                 fontWeight = FontWeight.Bold, color = GoldLight)
             Text("${userClass.emoji} ${userClass.name}", fontSize = 11.sp, color = TextMuted)
             Spacer(Modifier.height(6.dp))
+            // XP bar — реальные данные
             Box(
                 modifier = Modifier.fillMaxWidth().height(5.dp)
                     .clip(RoundedCornerShape(3.dp))
                     .background(Color.White.copy(alpha = 0.06f))
             ) {
                 Box(
-                    modifier = Modifier.fillMaxWidth(0.62f).fillMaxHeight()
-                        .clip(RoundedCornerShape(3.dp)).background(Gold)
+                    modifier = Modifier
+                        .fillMaxWidth(xpFraction).fillMaxHeight()
+                        .clip(RoundedCornerShape(3.dp))
+                        .background(Brush.horizontalGradient(listOf(PurpleAccent, Gold)))
                 )
             }
-            Text("620 / 1000 XP · Level 12", fontSize = 10.sp, color = TextMuted,
-                modifier = Modifier.padding(top = 4.dp))
+            Text("$currentXp / $maxXp XP · Level $level", fontSize = 10.sp,
+                color = TextMuted, modifier = Modifier.padding(top = 4.dp))
         }
     }
 }
 
-// ── Helpers ───────────────────────────────────────────────
-
 @Composable
 private fun SettingsSection(title: String) {
-    Text(
-        text          = title.uppercase(),
-        fontSize      = 10.sp,
-        fontWeight    = FontWeight.Bold,
-        letterSpacing = 0.10.sp,
-        color         = TextMuted,
-        modifier      = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 6.dp)
-    )
+    Text(title.uppercase(), fontSize = 10.sp, fontWeight = FontWeight.Bold,
+        letterSpacing = 0.10.sp, color = TextMuted,
+        modifier = Modifier.padding(start = 16.dp, top = 16.dp, bottom = 6.dp))
 }
 
 @Composable
 private fun SettingsGroup(content: @Composable ColumnScope.() -> Unit) {
     Column(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp)
+            .fillMaxWidth().padding(horizontal = 16.dp)
             .clip(RoundedCornerShape(12.dp))
             .background(BgCard)
             .border(0.5.dp, Gold.copy(0.18f), RoundedCornerShape(12.dp)),
@@ -193,11 +188,8 @@ private fun SettingsGroup(content: @Composable ColumnScope.() -> Unit) {
 
 @Composable
 private fun SettingsDivider() {
-    HorizontalDivider(
-        color     = Gold.copy(alpha = 0.10f),
-        thickness = 0.5.dp,
-        modifier  = Modifier.padding(start = 46.dp)
-    )
+    HorizontalDivider(color = Gold.copy(0.10f), thickness = 0.5.dp,
+        modifier = Modifier.padding(start = 46.dp))
 }
 
 @Composable
@@ -211,8 +203,7 @@ private fun SettingsItem(
 ) {
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick)
+            .fillMaxWidth().clickable(onClick = onClick)
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment     = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
@@ -237,8 +228,7 @@ private fun SwitchItem(
     var checked by remember { mutableStateOf(defaultChecked) }
     Row(
         modifier = Modifier
-            .fillMaxWidth()
-            .padding(horizontal = 14.dp, vertical = 12.dp),
+            .fillMaxWidth().padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment     = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {

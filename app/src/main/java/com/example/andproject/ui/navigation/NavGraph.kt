@@ -14,55 +14,70 @@ import com.example.andproject.ui.viewmodel.UserViewModel
 @Composable
 fun NavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
     val userViewModel: UserViewModel = hiltViewModel()
-    val userName by userViewModel.userName.collectAsState()
-    val userClassId by userViewModel.userClass.collectAsState()
+    val userName     by userViewModel.userName.collectAsState()
+    val userClassId  by userViewModel.userClass.collectAsState()
     val userProgress by userViewModel.userProgress.collectAsState()
 
     NavHost(
-        navController = navController,
+        navController    = navController,
         startDestination = Screen.Quests.route,
-        modifier = modifier
+        modifier         = modifier
     ) {
-        composable(Screen.Quests.route) { 
+        composable(Screen.Quests.route) {
             QuestsScreen(
-                userName = userName,
+                userName    = userName,
                 userClassId = userClassId,
-                level = userProgress.level,
-                currentXp = userProgress.currentXpInLevel,
-                maxXp = userProgress.maxXpInLevel,
-                onAddTask = { navController.navigate(Screen.AddTask.route) }
-            ) 
-        }
-        composable(Screen.Stats.route) { StatsScreen() }
-        composable(Screen.Settings.route) {
-            SettingsScreen(
-                userName = userName,
-                userClassId = userClassId,
-                onUsernameClick = { navController.navigate(Screen.UsernameChange.route) },
-                onClassClick = { navController.navigate(Screen.ClassPicker.route) },
-                onResetClick = { navController.navigate(Screen.ResetProgress.route) }
+                level       = userProgress.level,
+                currentXp   = userProgress.currentXpInLevel,
+                maxXp       = userProgress.maxXpInLevel,
+                xpToday     = userProgress.xpToday,
+                streak      = userProgress.streak,
+                onAddTask   = { navController.navigate(Screen.AddTask.route) }
             )
         }
-        composable(Screen.AddTask.route) { 
-            AddTaskScreen(navController = navController) 
+        composable(Screen.Stats.route) {
+            // Передаём реальные данные в StatsScreen
+            StatsScreen(
+                totalXp      = userProgress.totalXp,
+                tasksDone    = userProgress.tasksDoneTotal,
+                streak       = userProgress.streak,
+                level        = userProgress.level,
+                currentXp    = userProgress.currentXpInLevel,
+                maxXp        = userProgress.maxXpInLevel
+            )
+        }
+        composable(Screen.Settings.route) {
+            SettingsScreen(
+                userName        = userName,
+                userClassId     = userClassId,
+                level           = userProgress.level,
+                currentXp       = userProgress.currentXpInLevel,
+                maxXp           = userProgress.maxXpInLevel,
+                onUsernameClick = { navController.navigate(Screen.UsernameChange.route) },
+                onClassClick    = { navController.navigate(Screen.ClassPicker.route) },
+                onResetClick    = { navController.navigate(Screen.ResetProgress.route) }
+            )
+        }
+        composable(Screen.AddTask.route) {
+            AddTaskScreen(navController = navController)
         }
         composable(Screen.UsernameChange.route) {
             UsernameChangeScreen(
-                navController = navController,
-                currentUsername = userName,
+                navController     = navController,
+                currentUsername   = userName,
                 onUsernameChanged = { newName -> userViewModel.updateUserName(newName) }
             )
         }
         composable(Screen.ClassPicker.route) {
             ClassPickerScreen(
-                navController = navController,
+                navController  = navController,
                 currentClassId = userClassId,
                 onClassChanged = { newClass -> userViewModel.updateUserClass(newClass.id) }
             )
         }
         composable(Screen.ResetProgress.route) {
             ResetProgressScreen(
-                navController = navController,
+                navController    = navController,
                 onResetConfirmed = { userViewModel.resetProgress() }
             )
         }
